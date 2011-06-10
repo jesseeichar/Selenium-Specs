@@ -54,8 +54,8 @@ is exported as the following code:
 		  lazy val selenium = new WebDriverBackedSelenium(new org.openqa.selenium.firefox.FirefoxDriver(), "http://www.google.ch/")
 
 		  def is = 
-		  sequential                                                                    ^
-		  "This specification tests Google Search"    																	^ Step(() => selenium) ^ 
+		  sequential                                                ^
+		  "This specification tests Google Search"    ^ Step(() => selenium) ^ 
 		    "Searching google.ch for toys should return a toys r us result"             ! scala_specs2_1^
 		    "clicking the Bilder link should open the results for images search"        ! scala_specs2_2 ^
 		                                                                                Step(selenium.stop()) ^
@@ -81,18 +81,11 @@ is exported as the following code:
 		  }
 
 		  val TIMEOUT = 30
-		  private def doWait(assertion: => Boolean) = {
-		    1 to TIMEOUT find { _ =>
-		      if(assertion) {
-		        true
-		      } else {
-		        sleep(1000)
-		        false
-		      }
-		    }
-		  }
+		  private def doWait(assertion: => Boolean) = 
+		    (1 to TIMEOUT).view map {_=> sleep(1000)} find { _ => assertion }
 
 		}
+		
 		
 		
 		

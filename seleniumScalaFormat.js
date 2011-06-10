@@ -355,16 +355,8 @@ options.header =
 options.footer =
     "\n\n"+
     indents(1) + "val TIMEOUT = " + options.timeout + "\n" +
-    indents(1) + "private def doWait(assertion: => Boolean) = {\n" +
-    indents(1) + "  1 to TIMEOUT find { _ =>\n" +
-    indents(1) + "    if(assertion) {\n" +
-    indents(1) + "      true\n" +
-    indents(1) + "    } else {\n" +
-    indents(1) + "      sleep(1000)\n" +
-    indents(1) + "      false\n" +
-    indents(1) + "    }\n" +
-    indents(1) + "  }\n" +
-    indents(1) + "}\n"+
+    indents(1) + "private def doWait(assertion: => Boolean) = \n" +
+    indents(2) + "(1 to TIMEOUT).view map {_=> sleep(1000)} find { _ => assertion }\n" +
     "\n}\n";
 
 this.configForm = 

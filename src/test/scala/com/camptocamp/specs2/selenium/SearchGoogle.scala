@@ -38,15 +38,7 @@ class `Google Search` extends Specification with ThrownExpectations {
   }
 
   val TIMEOUT = 30
-  private def doWait(assertion: => Boolean) = {
-    1 to TIMEOUT find { _ =>
-      if(assertion) {
-        true
-      } else {
-        sleep(1000)
-        false
-      }
-    }
-  }
+  private def doWait(assertion: => Boolean) = 
+    (1 to TIMEOUT).view map {_=> sleep(1000)} find { _ => assertion }
 
 }
