@@ -1,7 +1,8 @@
 This project contains a selenium IDE format that outputs the recorded selenium script in scala and more specifically for Specs2.  
 
-For those not familiar Selenium is a framework for writing integration tests of web-applications.  It contains drivers for opening browsers and driving the browser as well as making assertions and verifications of elements on the page.  Since it uses the actual browser it can verify that all browser correctly handle the web application.
+For those not familiar Selenium is a framework for writing integration tests of web-applications. It contains drivers for opening browsers and driving the browser as well as making assertions and verifications of elements on the page. Since it uses the actual browser it can verify that all browser correctly handle the web application.  
 
+Selenium IDE is a firefox browser plugin that allows test script development by recording a users input and allowing the script to be re-run and tuned.  It allows the scripts to be exported in several formats including Java, RSpec and now Specs2.
 
 Installation
 ------------
