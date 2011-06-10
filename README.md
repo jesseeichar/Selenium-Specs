@@ -1,5 +1,7 @@
 This project contains a selenium IDE format that outputs the recorded selenium script in scala and more specifically for Specs2.  
 
+For those not familiar Selenium is a framework for writing integration tests of web-applications.  It contains drivers for opening browsers and driving the browser as well as making assertions and verifications of elements on the page.  Since it uses the actual browser it can verify that all browser correctly handle the web application.
+
 
 Installation
 ------------
@@ -29,6 +31,11 @@ More rules will be added in the future for formatting etc...
 
 Example Output
 --------------
+The selenium script 
+
+!https://github.com/jesseeichar/Selenium-Specs/raw/master/Selenium%20IDE.png
+
+is exported as the following code:
 
     package com.example.tests
 
@@ -43,8 +50,8 @@ Example Output
 		  lazy val selenium = new WebDriverBackedSelenium(new org.openqa.selenium.firefox.FirefoxDriver(), "http://www.google.ch/")
 
 		  def is = 
-		  sequential                                                ^
-		  "This specification tests Google Search"    ^ Step(() => selenium) ^ 
+		  sequential                                                                    ^
+		  "This specification tests Google Search"    																	^ Step(() => selenium) ^ 
 		    "Searching google.ch for toys should return a toys r us result"             ! scala_specs2_1^
 		    "clicking the Bilder link should open the results for images search"        ! scala_specs2_2 ^
 		                                                                                Step(selenium.stop()) ^
