@@ -103,6 +103,10 @@ function CommandProcessor() {
     };
 
     this.output = function () {
+	    if (this.currentFunction !== undefined) {
+    	    this.endFunction();
+    	}
+
         var closeStep =
             " ^\n" +
             this.repeat(" ",options.rightColumnIndent) + "Step(selenium.stop()) ^\n" +
@@ -147,10 +151,6 @@ this.formatCommands = function (commands) {
 		}
 	}
 	
-	if (this.currentFunction !== undefined) {
-	    this.endFunction();
-	}
-
 	result = processor.output();
 	
 	return result;
