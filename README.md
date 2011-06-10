@@ -1,4 +1,4 @@
-This class contains a selenium IDE format that outputs the recorded selenium script in scala and more specifically for Specs2.  
+This project contains a selenium IDE format that outputs the recorded selenium script in scala and more specifically for Specs2.  
 
 
 Installation
