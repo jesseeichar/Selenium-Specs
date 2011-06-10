@@ -1,6 +1,8 @@
 This class contains a selenium IDE format that outputs the recorded selenium script in scala and more specifically for Specs2.  
 
-h1. Installation
+
+Installation
+============
 
  * Install Firefox Selenium IDE plugins:  http://seleniumhq.org/download/
  * Select Tools > Selenium IDE menu item
@@ -10,13 +12,23 @@ h1. Installation
  * Copy and paste contents of https://raw.github.com/jesseeichar/Selenium-Specs/master/seleniumScalaFormat.js into the text area of new dialog
  * Click Save (note: Depending on selenium version You may not see new format until you close the Options dialog and re-open it)
 
+
+Running Tests
+=============
+
+To run the exported tests you need to add the dependencies in https://github.com/jesseeichar/Selenium-Specs/blob/master/build.sbt
+
+Fragment Formatting
+===================
+
 The output format uses comments to provide the output format with metadata on how to create the specs.  The current rules are:
 
   * If a comment starts with a - that line indicates the start of a new fragment
 
 More rules will be added in the future for formatting etc...
 
-An example of output is:
+Example Output
+==============
 
     package com.example.tests
 
