@@ -33,7 +33,7 @@ Example Output
 --------------
 The selenium script 
 
-!https://github.com/jesseeichar/Selenium-Specs/raw/master/Selenium%20IDE.png
+![Selenium Script Snapshot](https://github.com/jesseeichar/Selenium-Specs/raw/master/Selenium%20IDE.png)
 
 is exported as the following code:
 
