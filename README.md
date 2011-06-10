@@ -2,7 +2,7 @@ This class contains a selenium IDE format that outputs the recorded selenium scr
 
 
 Installation
-============
+------------
 
  * Install Firefox Selenium IDE plugins:  http://seleniumhq.org/download/
  * Select Tools > Selenium IDE menu item
@@ -14,12 +14,12 @@ Installation
 
 
 Running Tests
-=============
+-------------
 
 To run the exported tests you need to add the dependencies in https://github.com/jesseeichar/Selenium-Specs/blob/master/build.sbt
 
 Fragment Formatting
-===================
+-------------------
 
 The output format uses comments to provide the output format with metadata on how to create the specs.  The current rules are:
 
@@ -28,7 +28,7 @@ The output format uses comments to provide the output format with metadata on ho
 More rules will be added in the future for formatting etc...
 
 Example Output
-==============
+--------------
 
     package com.example.tests
 
