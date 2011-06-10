@@ -15,93 +15,104 @@ this.trim = function (s) {
 
 this.name = "scala-specs2";
 
-// contain the spec functions to add after spec definition
-this.functions = [];
-// the specification declarations
-this.specs=[];
-// Since there is not good way to create a function name we will
-// reuse the same name with an index
-this.functionIndex = 1;
-// if defined then the current function being constructed
-this.currentFunction = undefined;
-// the type of the last command processed.
-// Types are:  
-//   undefined (initial state), 
-//   spec
-//   assert
-//   other
-this.lastCommand = undefined;
+/**
+ * A class for processing commands
+ */
+function CommandProcessor() {
+    // contain the spec functions to add after spec definition
+    this.functions = [];
+    // the specification declarations
+    this.specs=[];
+    // Since there is not good way to create a function name we will
+    // reuse the same name with an index
+    this.functionIndex = 1;
+    // if defined then the current function being constructed
+    this.currentFunction = undefined;
+    // the type of the last command processed.
+    // Types are:
+    //   undefined (initial state),
+    //   spec
+    //   assert
+    //   other
+    this.lastCommand = undefined;
 
-// If defined the spec comment under construction
-this.specDec = undefined;
+    // If defined the spec comment under construction
+    this.specDec = undefined;
 
-function endFunction() {
-    if (this.currentFunction !== undefined) {
-        if (this.lastCommand !== 'assert') {
-            this.currentFunction += indents(2) + "success\n";
+    this.endFunction = function () {
+        if (this.currentFunction !== undefined) {
+            if (this.lastCommand !== 'assert') {
+                this.currentFunction += indents(2) + "success\n";
+            }
+            this.currentFunction += indents(1) + "}";
+            this.functions.push(this.currentFunction);
+            this.currentFunction = undefined;
         }
-        this.currentFunction += indents(1) + "}";
-        this.functions.push(this.currentFunction);
-        this.currentFunction = undefined;
+    };
+
+    this.repeat = function (c, n) {
+        var str = "";
+        for (var i = 0; i < n; i++) {
+            str += c;
+        }
+        return str;
+    };
+
+    this.handleSpecDeclaration = function (code) {
+        var spec,spaces;
+
+        if (this.lastCommand === 'spec') {
+            this.specs.push(this.specDec);
+        }
+
+        this.lastCommand = 'spec';
+        // this is a spec comment
+        spec = indents(2) + '"' + trim(code.substr(1)) + '"';
+        spaces = options.rightColumnIndent - spec.length;
+        this.specDec = spec + this.repeat(" ", spaces);
     }
-}
 
-function repeat(c, n) {
-	var str = "";
-	for (var i = 0; i < n; i++) {
-		str += c;
-	}
-	return str;
-}
+    this.processCommand = function (command, code) {
+        var methodName;
 
-function handleSpecDeclaration(code) {
-    var spec,spaces;
+        if (this.lastCommand === undefined && !startsWith(code, "//-")) {
+            this.handleSpecDeclaration("- "+options.initialSpec);
+        }
 
-    if (this.lastCommand === 'spec') {
-        this.specs.push(this.specDec);
-    } 
+        if (this.specDec !== undefined) {
+            methodName = name.replace(/ |\+|-|\|/g, '_') + "_" + this.functionIndex;
+            this.functionIndex += 1;
+            this.specDec += "! " + methodName;
 
-    this.lastCommand = 'spec';
-    // this is a spec comment
-    spec = indents(2) + '"' + trim(code.substr(1)) + '"';
-    spaces = options.rightColumnIndent - spec.length;
-    this.specDec = spec + repeat(" ", spaces);
-}
+            if (command.command.match(/^(verify|assert)/)) {
+                this.lastCommand = 'assert';
+            } else {
+                this.lastCommand = 'other';
+            }
 
-function processCommand(command, code) {
-    
-    
-    var methodName;
-    
-    if (this.lastCommand === undefined && !startsWith(code, "//-")) {
-        handleSpecDeclaration("- "+options.initialSpec);
-    } 
-    
-    if (this.specDec !== undefined) {
-        methodName = this.name.replace(/ |\+|-|\|/g, '_') + "_" + this.functionIndex;
-        this.functionIndex += 1;
-        this.specDec += "! " + methodName;
+            this.currentFunction =
+                indents(1) + "def " + methodName + " = {\n"+
+                indents(2) + "import selenium._\n" +
+                indents(2) + code + "\n";
 
-        if (command.command.match(/^(verify|assert)/)) {
-            this.lastCommand = 'assert';
+            this.specs.push(this.specDec);
+            this.specDec = undefined;
         } else {
-            this.lastCommand = 'other';
+            this.currentFunction += indents(2) + code + "\n";
         }
+    };
 
-        this.currentFunction = 
-            indents(1) + "def " + methodName + " = {\n"+
-            indents(2) + "import selenium._\n" +
-            indents(2) + code + "\n";
-        
-        this.specs.push(this.specDec);
-        this.specDec = undefined;
-    } else {
-        this.currentFunction += indents(2) + code + "\n";
-    }
+    this.output = function () {
+        var closeStep =
+            " ^\n" +
+            this.repeat(" ",options.rightColumnIndent) + "Step(selenium.stop()) ^\n" +
+            this.repeat(" ",options.rightColumnIndent) + "end\n"
 
+        return this.specs.join("^\n") + closeStep + "\n\n" + this.functions.join("\n\n");
+    };
 }
-
 this.formatCommands = function (commands) {
+    var processor = new CommandProcessor();
     commands = filterForRemoteControl(commands);
 	if (this.lastIndent == null) {
 		this.lastIndent = '';
@@ -117,8 +128,8 @@ this.formatCommands = function (commands) {
 			command.line = line;
 		} else if (command.type == 'comment') {
 		    if(startsWith(command.comment, '-')) {
-		        endFunction();
-                handleSpecDeclaration(command.comment);
+		        processor.endFunction();
+                processor.handleSpecDeclaration(command.comment);
 	        } else {
 	            line = this.formatComment(command);
     			if (line != null) {
@@ -131,7 +142,7 @@ this.formatCommands = function (commands) {
 		command.charIndex = this.commandCharIndex;
 		if (line != null) {
 			updateIndent(line);
-            processCommand(command, line);
+            processor.processCommand(command, line);
 			this.commandCharIndex += line.length;
 		}
 	}
@@ -139,12 +150,8 @@ this.formatCommands = function (commands) {
 	if (this.currentFunction !== undefined) {
 	    this.endFunction();
 	}
-	var closeStep = 
-	    " ^\n" + 
-	    repeat(" ",options.rightColumnIndent) + "Step(selenium.stop()) ^\n" +
-	    repeat(" ",options.rightColumnIndent) + "end\n"
-	    
-	result = specs.join("^\n") + closeStep + "\n\n" + functions.join("\n\n");
+
+	result = processor.output();
 	
 	return result;
 }
@@ -321,7 +328,7 @@ this.options = {
     packageName: "com.example.tests",
     indent: '2',
     initialIndents: '0',
-    rightColumnIndent: 60,
+    rightColumnIndent: 80,
     seleniumDriver: "org.openqa.selenium.firefox.FirefoxDriver",
     specSummary: "This specification tests",
     initialSpec: "The selenium script should succeed",
