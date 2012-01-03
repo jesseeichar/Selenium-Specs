@@ -98,6 +98,7 @@ function CommandProcessor() {
             this.specs.push(this.specDec);
             this.specDec = undefined;
         } else {
+            
             this.currentFunction += indents(2) + code + "\n";
         }
     };
@@ -107,11 +108,7 @@ function CommandProcessor() {
     	    this.endFunction();
     	}
 
-        var closeStep =
-            " ^\n" +
-            this.repeat(" ",options.rightColumnIndent) + "Step(selenium.stop()) ^\n" +
-            this.repeat(" ",options.rightColumnIndent) + "end\n"
-
+        var closeStep = ""
         return this.specs.join("^\n") + closeStep + "\n\n" + this.functions.join("\n\n");
     };
 }
@@ -173,13 +170,13 @@ function assertTrue(expression) {
     return expression.toString()+" must beTrue";
 }
 
-this.verifyTrue = assertTrue;
+function verifyTrue(expression) {return assertTrue(expression);}
 
 function assertFalse(expression) {
     return expression.toString() + "must beFalse";
 }
 
-this.verifyFalse = assertFalse;
+function verifyFalse(expression) {return assertFalse(expression);}
 
 function assignToVariable(type, variable, expression) {
     return "val " + variable + " = " + expression.toString();
@@ -209,8 +206,9 @@ Equals.prototype.assert = function() {
     return  this.e1.toString() + " must_== " + this.e2.toString();
 };
 
-Equals.prototype.verify = Equals.assert
-
+Equals.prototype.verify = function() {
+    return  this.e1.toString() + " must_== " + this.e2.toString();
+};
 NotEquals.prototype.toString = function() {
     return this.e1.toString() + " != " + this.e2.toString() ;
 };
@@ -222,9 +220,11 @@ NotEquals.prototype.assert = function() {
 NotEquals.prototype.verify = NotEquals.assert
 
 RegexpMatch.prototype.toString = function() {
-  return this.expression + " =~ \"\"\"" + this.pattern + "\"\"\"";
+  return this.expression + ".matches (\"\"\"" + this.pattern + "\"\"\")";
 };
-
+RegexpMatch.prototype.verify = function() {
+	return this.expression + " must =~ (\"\"\"" + this.pattern + "\"\"\")";
+};
 function pause(milliseconds) {
     return "sleep(" + parseInt(milliseconds, 10) + ")";
 }
@@ -336,6 +336,10 @@ this.options = {
 };
 
 options.header =
+    "package c2c.webspecs\n" +
+    "package geonetwork\n" +
+    "package geocat\n" +
+    "package spec\n" +
     "package ${packageName}\n" +
     "\n" +
     "import org.specs2._\n" +
@@ -343,20 +347,20 @@ options.header =
     "import specification.Step\n" +
     "import Thread._\n" +
     "import org.openqa.selenium.WebDriverBackedSelenium\n" +
+    "import org.junit.runner.RunWith\n" +
+    "import org.specs2.runner.JUnitRunner\n" +
     "\n" +
-    "class `${className}` extends Specification with ThrownExpectations { \n" +
+    "@RunWith(classOf[JUnitRunner])\n" +
+    "class `${className}` extends GeocatSeleniumSpecification with ThrownExpectations { \n" +
     "\n"+
-    indents(1) + "lazy val selenium = new WebDriverBackedSelenium(new ${seleniumDriver}(), \"${baseURL}\")\n" +
-    "\n" +
-    indents(1) + "def is = \n" + 
-    indents(1) + "sequential                                                ^\n" +
-    indents(1) + "\"${specSummary} ${className}\"    ^ Step(() => selenium) ^ \n";
+    indents(1) + "def isImpl = \n" + 
+    indents(1) + "\"${specSummary} ${className}\"    ^ \n";
     
 options.footer =
     "\n\n"+
     indents(1) + "val TIMEOUT = " + options.timeout + "\n" +
-    indents(1) + "private def doWait(assertion: => Boolean) = \n" +
-    indents(2) + "(1 to TIMEOUT).view map {_=> sleep(1000)} find { _ => assertion }\n" +
+    indents(1) + "private def doWait(assertion: => Boolean, waits:Int=TIMEOUT, length:Int=1000) = \n" +
+    indents(2) + "(1 to waits).view map {_=> sleep(length)} find { _ => assertion }\n" +
     "\n}\n";
 
 this.configForm = 
